@@ -87,6 +87,8 @@ function App() {
     }
   }
 
+  const [getFileErrorState, setGetFileErrorState] = useState<boolean>(false);
+
   function handleFileClickNavigation(file: any) {
     if (file.IsDir) {
       setFilePath((prevFilePath) => {
@@ -95,17 +97,9 @@ function App() {
           newFilePath = newFilePath.substring(0, newFilePath.length - 1);
         }
         newFilePath = `${newFilePath}/${file.FileName}`;
-        try {
-          getFileList(newFilePath).catch((err) => {
-            console.log("errrrorr");
-            console.error(err);
-          });
-          console.log("Can navigate");
-          return newFilePath;
-        } catch (err) {
-          console.error("Cannnot navigate");
-          return prevFilePath;
-        }
+        getFileList(newFilePath).catch(() => setGetFileErrorState(true));
+        console.log("Can navigate");
+        return newFilePath;
       });
     }
   }

@@ -87,20 +87,20 @@ function App() {
     }
   }
 
-  const [getFileErrorState, setGetFileErrorState] = useState<boolean>(false);
-
-  function handleFileClickNavigation(file: any) {
+  async function handleFileClickNavigation(file: any) {
     if (file.IsDir) {
-      setFilePath((prevFilePath) => {
-        let newFilePath = prevFilePath;
-        if (newFilePath[newFilePath.length - 1] === "/") {
-          newFilePath = newFilePath.substring(0, newFilePath.length - 1);
-        }
-        newFilePath = `${newFilePath}/${file.FileName}`;
-        getFileList(newFilePath).catch(() => setGetFileErrorState(true));
-        console.log("Can navigate");
-        return newFilePath;
-      });
+      let newFilePath = filePath;
+      if (newFilePath[newFilePath.length - 1] === "/") {
+        newFilePath = newFilePath.substring(0, newFilePath.length - 1);
+      }
+      newFilePath = `${newFilePath}/${file.FileName}`;
+      try {
+        await getFileList(newFilePath);
+        setFilePath(newFilePath);
+      } catch (err) {
+        console.error(err);
+        alert("Need Permission to access!!");
+      }
     }
   }
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"os/user"
 	"path/filepath"
 )
 
@@ -95,7 +94,6 @@ func readDirWithPermissionCheck(path string) ([]fs.DirEntry, error) {
 	// Check read permission
 	files, err := os.ReadDir(absPath)
 	if err != nil {
-		fmt.Print("Error getting files")
 		fmt.Print(err)
 		return nil, fmt.Errorf("no read permission for %s: %v", absPath, err)
 	}
@@ -103,42 +101,17 @@ func readDirWithPermissionCheck(path string) ([]fs.DirEntry, error) {
 	return files, nil
 }
 
-func CheckPermission(path string) error {
-	_, err := readDirWithPermissionCheck(path)
-	return err
-}
-
 func (a *App) ListDir(dirPath string, additionalParmas AdditionalParams) ([]FileStruct, error) {
 	files, err := readDirWithPermissionCheck(dirPath)
 	if err != nil {
 		fmt.Println("no permissions :(")
-		fmt.Print(err)
+		fmt.Println(err)
 		return []FileStruct{}, err
-	}
-
-	// files, err := os.ReadDir(dirPath)
-	if err != nil {
-		fmt.Print("Error getting files")
-		fmt.Print(err)
 	}
 
 	var fileStruct []FileStruct
 
-	currentUser, err := user.Current()
-	if err != nil {
-		fmt.Println("can not get current user")
-		fmt.Print(err)
-	}
-	fmt.Println(currentUser.Name)
 	for _, file := range files {
-		// filePermissions, err := file.Info()
-		// if err != nil {
-		// 	fmt.Println(err)
-		// }
-		// for i := 0; i < 10; i++ {
-		// 	fmt.Print(string(filePermissions.Mode().String()[i]))
-		// }
-		// fmt.Println()
 		fileInfoStuct := FileStruct{
 			FileName: file.Name(),
 			IsDir:    file.IsDir(),

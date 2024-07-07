@@ -103,6 +103,11 @@ func readDirWithPermissionCheck(path string) ([]fs.DirEntry, error) {
 
 func (a *App) ListDir(dirPath string, additionalParmas AdditionalParams) ([]FileStruct, error) {
 	files, err := readDirWithPermissionCheck(dirPath)
+
+	if len(files) == 0 {
+		return []FileStruct{}, nil
+	}
+
 	if err != nil {
 		fmt.Println("no permissions :(")
 		fmt.Println(err)

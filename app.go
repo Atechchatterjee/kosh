@@ -154,6 +154,23 @@ func (a *App) RemoveFile(dirPath string) error {
 	return err
 }
 
+func (a *App) CreateDir(dirPath string) error {
+	err := os.Mkdir(dirPath, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+func (a *App) CreateFile(filePath string) error {
+	f, err := os.Create(filePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	f.Close()
+	return err
+}
+
 func (a *App) ListDir(dirPath string, additionalParmas AdditionalParams) ([]FileStruct, error) {
 	files, err := readDirWithPermissionCheck(dirPath)
 

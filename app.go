@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -99,6 +100,58 @@ func readDirWithPermissionCheck(path string) ([]fs.DirEntry, error) {
 	}
 
 	return files, nil
+}
+
+func (a *App) OpenFileInVSCode(filePath string) {
+	fmt.Printf("opening %s in vs code text ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("code '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) OpenFileInSublimeText(filePath string) {
+	fmt.Printf("opening %s in sublime text ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("subl '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) OpenPdfInXDG(filePath string) {
+	fmt.Printf("opening %s in xdg pdf viewer ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("xdg-open '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) OpenImageInFeh(filePath string) {
+	fmt.Printf("opening %s in feh image viewer ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("feh '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) RemoveFile(dirPath string) error {
+	err := os.Remove(dirPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
 }
 
 func (a *App) ListDir(dirPath string, additionalParmas AdditionalParams) ([]FileStruct, error) {

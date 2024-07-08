@@ -33,7 +33,7 @@ func main() {
 		MaxHeight:         1080,
 		DisableResize:     false,
 		Fullscreen:        true,
-		Frameless:         true,
+		Frameless:         false,
 		StartHidden:       false,
 		HideWindowOnClose: false,
 		BackgroundColour:  &options.RGBA{R: 24, G: 27, B: 33, A: 255},

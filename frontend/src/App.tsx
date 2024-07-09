@@ -87,7 +87,7 @@ function PathBreadcrumb({
                   if (filePathArray[j] !== "")
                     modifiedFilePath += filePathArray[j].trim() + "/";
                 }
-                onChangeFilePath(removeTrailingSlash(modifiedFilePath));
+                onChangeFilePath("/" + removeTrailingSlash(modifiedFilePath));
               }}
             >
               <BreadcrumbLink>{name}</BreadcrumbLink>

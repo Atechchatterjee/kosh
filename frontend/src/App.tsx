@@ -227,7 +227,6 @@ function App() {
                   path={filePath}
                   onChangeFilePath={(modifiedFilePath) => {
                     setFilePath(modifiedFilePath);
-                    alert(modifiedFilePath);
                     getFileList(modifiedFilePath);
                   }}
                   className="items-center select-none my-auto"

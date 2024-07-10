@@ -12,8 +12,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   RiArrowLeftSLine,
   RiArrowRightSLine,
+  RiCloseFill,
+  RiExpandDiagonalLine,
   RiFile2Fill,
   RiFolder3Fill,
+  RiSubtractLine,
 } from "@remixicon/react";
 import { cn, removeTrailingSlash } from "./lib/utils";
 import {
@@ -23,11 +26,6 @@ import {
   ContextMenuItem,
 } from "./components/ui/context-menu";
 import { RootContext } from "./context";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "./components/ui/resizable";
 import NewFileDialog, {
   NewFileDialogContext,
   NewFileDialogStateWrapper,
@@ -41,8 +39,15 @@ import {
   BreadcrumbLink,
   BreadcrumbSeparator,
 } from "./components/ui/breadcrumb";
+import {
+  Quit,
+  WindowIsMaximised,
+  WindowMaximise,
+  WindowMinimise,
+  WindowUnmaximise,
+} from "../wailsjs/runtime/runtime";
 
-function ContextWrapper({ children }: React.PropsWithChildren) {
+function ViewContextWrapper({ children }: React.PropsWithChildren) {
   const { setOpen } = useContext(NewFileDialogContext);
 
   return (
@@ -55,6 +60,63 @@ function ContextWrapper({ children }: React.PropsWithChildren) {
         <ContextMenuItem>New File</ContextMenuItem>
         <ContextMenuItem>Open in Terminal</ContextMenuItem>
         <ContextMenuItem>Open in VS Code</ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
+function FileContextWrapper({
+  file,
+  i,
+  getFileList,
+  children,
+}: {
+  file: any;
+  getFileList: (_?: string) => Promise<void>;
+  i: number;
+} & React.PropsWithChildren) {
+  const { filePath } = useContext(RootContext);
+  return (
+    <ContextMenu key={i} modal>
+      <ContextMenuTrigger>{children}</ContextMenuTrigger>
+      <ContextMenuContent>
+        {!file.IsDir && (
+          <>
+            <ContextMenuItem
+              onClick={() => {
+                OpenFileInVSCode(
+                  `${removeTrailingSlash(filePath)}/${file.FileName}`,
+                );
+              }}
+            >
+              Open with VS Code
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() => {
+                OpenFileInSublimeText(
+                  `${removeTrailingSlash(filePath)}/${file.FileName}`,
+                );
+              }}
+            >
+              Open With Sublime Text
+            </ContextMenuItem>
+          </>
+        )}
+        <ContextMenuItem>Properties</ContextMenuItem>
+        <ContextMenuItem
+          onClick={async () => {
+            try {
+              await RemoveFile(
+                `${removeTrailingSlash(filePath)}/${file.FileName}`,
+              );
+              await getFileList();
+            } catch (err) {
+              console.error(err);
+            }
+          }}
+        >
+          Remove
+        </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
   );
@@ -186,133 +248,113 @@ function App() {
       value={{ homeDir: homeDir.current, filePath: filePath, getFileList }}
     >
       <NewFileDialogStateWrapper>
-        <ResizablePanelGroup
-          direction="horizontal"
-          className="w-full h-[100vh]"
-        >
-          <ResizablePanel
-            defaultSize={30}
-            className="min-w-[15rem] max-w-[34%]"
-          >
+        <div className="flex gap-2">
+          <div className="relative min-w-[15rem]">
             <MainSidebar
               cb={(linkPath) => {
                 setFilePath(linkPath);
                 getFileList(linkPath);
               }}
+              className="fixed"
             />
-          </ResizablePanel>
-          <ResizableHandle />
-          <ResizablePanel
-            defaultSize={70}
-            className="h-[100vh] overflow-y-scroll"
-          >
-            <div className="w-full p-[0.5rem] gap-4">
-              <div className="flex gap-2 select-none">
-                <div className="flex gap-1 select-none">
-                  <Button
-                    variant="ghost"
-                    className="w-[2.2rem] h-[2.2rem] p-2 rounded-lg"
-                    onClick={moveToPrevDir}
-                  >
-                    <RiArrowLeftSLine />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-[2.2rem] h-[2.2rem] p-2 rounded-lg"
-                  >
-                    <RiArrowRightSLine />
-                  </Button>
-                </div>
+          </div>
+          <div className="w-full h-[100vh] overflow-hidden gap-4">
+            <div
+              className="bg-white px-3 py-2 w-full flex gap-2 select-none"
+              style={{ widows: 1 }} // acts as the handle bar for dragging windows
+            >
+              <div className="flex gap-1 select-none">
+                <Button
+                  variant="ghost"
+                  className="w-[2.2rem] h-[2.2rem] p-2 rounded-lg"
+                  onClick={moveToPrevDir}
+                >
+                  <RiArrowLeftSLine />
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-[2.2rem] h-[2.2rem] p-2 rounded-lg"
+                >
+                  <RiArrowRightSLine />
+                </Button>
+              </div>
+              <div className="flex w-full gap-2">
                 <PathBreadcrumb
                   path={filePath}
                   onChangeFilePath={(modifiedFilePath) => {
                     setFilePath(modifiedFilePath);
                     getFileList(modifiedFilePath);
                   }}
-                  className="items-center select-none my-auto"
+                  className="items-center flex-1 select-none my-auto"
                 />
-              </div>
-              <ContextWrapper>
-                <div className="flex flex-col gap-2 px-3 mt-2 pb-10 h-[95vh] overflow-scroll">
-                  {fileList.map((file, i) => (
-                    <ContextMenu key={i} modal>
-                      <ContextMenuTrigger>
-                        <div
-                          className={cn(
-                            "flex gap-4 border text-md",
-                            focusedFile === i
-                              ? "border-blue-300"
-                              : "border-gray-200",
-                            "px-4 py-2 min-h-[2rem] rounded-md items-center ",
-                            focusedFile === i ? "bg-slate-100" : "bg-white",
-                            " hover:bg-slate-100",
-                          )}
-                          onClick={() => setFocusedFile(i)}
-                          onDoubleClick={() => handleFileClickNavigation(file)}
-                        >
-                          {file.IsDir ? (
-                            <RiFolder3Fill size={18} />
-                          ) : (
-                            <RiFile2Fill size={18} />
-                          )}
-                          <p className="cursor-default w-full select-none overflow-hidden truncate">
-                            {file.FileName}
-                          </p>
-                        </div>
-                      </ContextMenuTrigger>
-                      <ContextMenuContent>
-                        {!file.IsDir && (
-                          <>
-                            <ContextMenuItem
-                              onClick={() => {
-                                OpenFileInVSCode(
-                                  `${removeTrailingSlash(filePath)}/${
-                                    file.FileName
-                                  }`,
-                                );
-                              }}
-                            >
-                              Open with VS Code
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              onClick={() => {
-                                OpenFileInSublimeText(
-                                  `${removeTrailingSlash(filePath)}/${
-                                    file.FileName
-                                  }`,
-                                );
-                              }}
-                            >
-                              Open With Sublime Text
-                            </ContextMenuItem>
-                          </>
-                        )}
-                        <ContextMenuItem>Properties</ContextMenuItem>
-                        <ContextMenuItem
-                          onClick={async () => {
-                            try {
-                              await RemoveFile(
-                                `${removeTrailingSlash(filePath)}/${
-                                  file.FileName
-                                }`,
-                              );
-                              await getFileList();
-                            } catch (err) {
-                              console.error(err);
-                            }
-                          }}
-                        >
-                          Remove
-                        </ContextMenuItem>
-                      </ContextMenuContent>
-                    </ContextMenu>
-                  ))}
+                <div className="flex gap-1 ml-auto">
+                  <Button
+                    variant="ghost"
+                    className="w-[2.2rem] h-[2.2rem] p-2 rounded-full ml-auto"
+                    onClick={WindowMinimise}
+                  >
+                    <RiSubtractLine size={18} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-[2.2rem] h-[2.2rem] p-2 rounded-full ml-auto"
+                    onClick={async () => {
+                      if (await WindowIsMaximised()) WindowUnmaximise();
+                      else WindowMaximise();
+                    }}
+                  >
+                    <RiExpandDiagonalLine size={18} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-[2.2rem] h-[2.2rem] p-2 rounded-full ml-auto"
+                    onClick={Quit}
+                  >
+                    <RiCloseFill size={18} />
+                  </Button>
                 </div>
-              </ContextWrapper>
+              </div>
             </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-        <NewFileDialog className="hidden" successCb={getFileList} />
+            <ViewContextWrapper>
+              <div className="flex flex-col h-[90vh] overflow-scroll gap-2 px-3 pt-[0.5rem] pb-5 min-h-[100vh]">
+                {fileList.map((file, i) => (
+                  <FileContextWrapper
+                    i={i}
+                    file={file}
+                    getFileList={getFileList}
+                  >
+                    <div
+                      className={cn(
+                        "flex gap-4 border text-md",
+                        focusedFile === i
+                          ? "border-blue-300"
+                          : "border-gray-200",
+                        "px-4 py-3 min-h-[2rem] rounded-md items-center ",
+                        focusedFile === i ? "bg-slate-100" : "bg-white",
+                        " hover:bg-slate-100",
+                      )}
+                      onClick={() => setFocusedFile(i)}
+                      onDoubleClick={() => handleFileClickNavigation(file)}
+                    >
+                      {file.IsDir ? (
+                        <RiFolder3Fill size={18} />
+                      ) : (
+                        <RiFile2Fill size={18} />
+                      )}
+                      <p className="cursor-default w-full select-none text-sm overflow-hidden truncate">
+                        {file.FileName}
+                      </p>
+                    </div>
+                  </FileContextWrapper>
+                ))}
+                {fileList.length === 0 && (
+                  <p className="m-auto text-slate-600">Empty Directory</p>
+                )}
+              </div>
+            </ViewContextWrapper>
+          </div>
+          <NewFileDialog className="hidden" successCb={getFileList} />
+        </div>
       </NewFileDialogStateWrapper>
     </RootContext.Provider>
   );

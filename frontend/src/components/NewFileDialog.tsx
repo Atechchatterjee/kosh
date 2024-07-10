@@ -45,7 +45,8 @@ export default function NewFileDialog({
   const [newFolderName, setNewFolderName] = useState<string>("");
   const { filePath } = useContext(RootContext);
 
-  async function handleFolderCreation() {
+  async function handleFolderCreation(e: any) {
+    e.preventDefault();
     const newFolderPath = `${removeTrailingSlash(filePath)}/${newFolderName}`;
     try {
       await CreateDir(newFolderPath);
@@ -63,8 +64,8 @@ export default function NewFileDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create New Folder</DialogTitle>
-          <DialogDescription className="pt-4 flex gap-4">
-            <form onSubmit={handleFolderCreation}>
+          <DialogDescription>
+            <form onSubmit={handleFolderCreation} className="pt-4 flex gap-4">
               <Input
                 placeholder="Folder Name"
                 value={newFolderName}

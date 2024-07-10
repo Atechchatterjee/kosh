@@ -44,11 +44,11 @@ function NavItems({
   return (
     <div
       className={cn(
-        "flex gap-3 items-center py-2 px-3",
+        "flex gap-3 items-center py-2 px-3 text-sm",
         active
           ? "bg-white text-black hover:bg-white/90"
-          : "bg-transparent  hover:bg-[#2d333e]",
-        "cursor-pointer rounded-lg",
+          : "bg-transparent hover:bg-[#2d333e]",
+        "cursor-pointer rounded-sm",
         className,
       )}
       {...props}
@@ -59,7 +59,11 @@ function NavItems({
   );
 }
 
-export default function MainSidebar({ cb }: { cb?: (_: string) => void }) {
+export default function MainSidebar({
+  cb,
+  className,
+  ...props
+}: { cb?: (_: string) => void } & React.HTMLAttributes<HTMLDivElement>) {
   const { homeDir, getFileList } = useContext(RootContext);
   const NavLinks: NavLink[] = [
     {
@@ -104,12 +108,17 @@ export default function MainSidebar({ cb }: { cb?: (_: string) => void }) {
   const [popoverOpen, setPopOverOpen] = useState<boolean>(false);
 
   return (
-    <div className="flex flex-col h-[100vh] min-w-[15rem] bg-[#181B21] select-none text-sm">
+    <div
+      className={cn(
+        "flex flex-col h-[100vh] min-w-[15rem] bg-[#181B21] select-none text-sm",
+        className,
+      )}
+      {...props}
+    >
       <section className="flex px-4 pt-1 pb-1 items-center">
         <div className="flex gap-4 items-center">
-          <img src="/src/assets/icon-light-wbg.svg" className="h-[1.2rem]" />
           <p className="text-white text-sm font-Geist font-semibold h-fit mt-[0.3rem]">
-            Kosh
+            <img src="/src/assets/icon-text-light.svg" className="h-[1rem]" />
           </p>
         </div>
         <Popover

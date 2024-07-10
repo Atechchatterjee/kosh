@@ -245,7 +245,7 @@ function App() {
                               : "border-gray-200",
                             "px-4 py-2 min-h-[2rem] rounded-md items-center ",
                             focusedFile === i ? "bg-slate-100" : "bg-white",
-                            " hover:bg-slate-100 overflow-hidden truncate",
+                            " hover:bg-slate-100",
                           )}
                           onClick={() => setFocusedFile(i)}
                           onDoubleClick={() => handleFileClickNavigation(file)}
@@ -255,7 +255,7 @@ function App() {
                           ) : (
                             <RiFile2Fill size={18} />
                           )}
-                          <p className="cursor-default select-none">
+                          <p className="cursor-default w-full select-none overflow-hidden truncate">
                             {file.FileName}
                           </p>
                         </div>

@@ -5,8 +5,13 @@
 
 This is a modern file manager - "Kosh". It aims to improve on the user experience of using a file-manager by providing seamless, well thought out features.
 
-![](https://ik.imagekit.io/hbqsxmwrz/app-screenshot.png?updatedAt=1720625653654)
+Light Mode:
 
+![](https://ik.imagekit.io/hbqsxmwrz/app-screenshot-light.png?updatedAt=1720813763139)
+
+Dark Mode:
+
+![](https://ik.imagekit.io/hbqsxmwrz/app-screenshot-dark.png?updatedAt=1720813569744)
 ## Intstallation
 
 Clone the [repo](https://github.com/Atechchatterjee/kosh) to get started.

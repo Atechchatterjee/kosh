@@ -19,9 +19,9 @@ Clone the [repo](https://github.com/Atechchatterjee/kosh) to get started.
 ### Run the app in dev mode
 
 ```bash
-    cd frontend && npm install
-    cd ..
-    wails dev
+cd frontend && npm install
+cd ..
+wails dev
 ```
 
 ### Run a production build

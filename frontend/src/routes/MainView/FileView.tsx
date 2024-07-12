@@ -1,12 +1,9 @@
 import { cn, removeTrailingSlash } from "@/lib/utils";
 import {
   RiArrowLeftSLine,
-  RiArrowRightSLine,
-  RiSubtractLine,
-  RiExpandDiagonalLine,
-  RiCloseFill,
   RiFolder3Fill,
   RiFile2Fill,
+  RiArrowRightSLine,
 } from "@remixicon/react";
 import { useContext, useMemo, useState } from "react";
 import {
@@ -17,13 +14,6 @@ import {
   RemoveFile,
 } from "@/../wailsjs/go/main/App";
 import {
-  WindowMinimise,
-  WindowIsMaximised,
-  WindowUnmaximise,
-  WindowMaximise,
-  Quit,
-} from "@/../wailsjs/runtime/runtime";
-import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
@@ -31,7 +21,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { MainViewContext, RootContext, ThemeContext } from "@/context";
+import { MainViewContext, RootContext } from "@/context";
 import {
   ContextMenu,
   ContextMenuTrigger,

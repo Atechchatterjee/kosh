@@ -14,6 +14,7 @@ export default function MainView() {
   const [rightSideView, setRightSideView] = useState<
     "fileView" | "settingsView"
   >("fileView");
+
   let homeDir = useRef<string>("");
 
   useEffect(() => {

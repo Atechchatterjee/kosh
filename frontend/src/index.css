@@ -4,14 +4,17 @@
 
 @layer base {
     :root {
-        --background: 0 0% 100%;
-        --foreground: 222.2 84% 4.9%;
+        --background: #ffffff;
+        --foreground: #000000;
 
         --muted: 210 40% 96.1%;
         --muted-foreground: 215.4 16.3% 46.9%;
 
-        --popover: 0 0% 100%;
-        --popover-foreground: 222.2 84% 4.9%;
+        --popover: #ffffff;
+        --popover: #000000;
+
+        /* --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%; */
 
         --card: 0 0% 100%;
         --card-foreground: 222.2 84% 4.9%;
@@ -37,26 +40,34 @@
     }
 
     .dark {
-        --background: 222.2 84% 4.9%;
+        /* --background: #181b21; */
+        --background: #151d2b;
+        /* --background: 222.2 84% 4.9%; */
         --foreground: 210 40% 98%;
 
         --muted: 217.2 32.6% 17.5%;
         --muted-foreground: 215 20.2% 65.1%;
 
-        --popover: 222.2 84% 4.9%;
-        --popover-foreground: 210 40% 98%;
-
         --card: 222.2 84% 4.9%;
         --card-foreground: 210 40% 98%;
 
-        --border: 217.2 32.6% 17.5%;
-        --input: 217.2 32.6% 17.5%;
+        --popover: #1e293a;
+        --popover-foreground: #000000;
 
-        --primary: 210 40% 98%;
-        --primary-foreground: 222.2 47.4% 11.2%;
+        /* --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%; */
 
-        --secondary: 217.2 32.6% 17.5%;
-        --secondary-foreground: 210 40% 98%;
+        --border: #3d4d68;
+        --input: #3d4d68;
+
+        /* --primary: #0095ff;
+        --primary-foreground: #ffffff; */
+
+        --primary: #1e293a;
+        --primary-foreground: #ffffff;
+
+        --secondary: #32435e;
+        --secondary-foreground: #ffffff;
 
         --accent: 217.2 32.6% 17.5%;
         --accent-foreground: 210 40% 98%;
@@ -73,13 +84,16 @@
         font-family: "Geist";
         src: url("./assets/fonts/GeistVF.woff") format(".woff");
     }
+
     @font-face {
         font-family: "SpaceGrotesque";
         src: url("./assets/fonts/SpaceGrotesqueVF.ttf") format(".woff");
     }
+
     * {
         @apply border-border;
     }
+
     body {
         @apply bg-background text-foreground;
         font-family: SpaceGrotesque;

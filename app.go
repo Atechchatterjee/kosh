@@ -147,7 +147,7 @@ func (a *App) OpenImageInFeh(filePath string) {
 }
 
 func (a *App) RemoveFile(dirPath string) error {
-	err := os.Remove(dirPath)
+	err := os.RemoveAll(dirPath)
 	if err != nil {
 		fmt.Println(err)
 	}

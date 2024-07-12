@@ -72,7 +72,9 @@ export default function NewFileDialog({
                 onChange={(e) => setNewFolderName(e.target.value)}
               />
               <DialogClose asChild>
-                <Button type="submit">Create</Button>
+                <Button variant="default" type="submit">
+                  Create
+                </Button>
               </DialogClose>
             </form>
           </DialogDescription>

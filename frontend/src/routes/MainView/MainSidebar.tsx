@@ -135,11 +135,11 @@ export default function MainSidebar({
               <RiMenuFill size={18} />
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="p-1 w-[10rem] dark:bg-background">
+          <PopoverContent className="p-1 w-[10rem] bg-white border-slate-200 dark:border-border dark:bg-primary">
             <NewFileDialog
               className="flex w-full"
               triggerButton={() => (
-                <div className="flex gap-1 px-2 w-full items-center cursor-pointer rounded-md hover:bg-slate-200 dark:hover:bg-primary">
+                <div className="flex gap-1 px-2 w-full items-center cursor-pointer rounded-md hover:bg-slate-200 dark:hover:bg-secondary">
                   <RiFolderAddFill size={18} />
                   <div className="py-2 px-2 text-sm">New Folder</div>
                 </div>
@@ -149,7 +149,7 @@ export default function MainSidebar({
                 getFileList();
               }}
             />
-            <div className="flex gap-1 px-2 items-center cursor-pointer rounded-md hover:bg-slate-200 dark:hover:bg-primary">
+            <div className="flex gap-1 px-2 items-center cursor-pointer rounded-md hover:bg-slate-200 dark:hover:bg-secondary">
               <RiToolsFill size={18} />
               <div className="py-2 px-2 text-sm">Preferences</div>
             </div>
@@ -172,7 +172,8 @@ export default function MainSidebar({
       </section>
       <section className="mt-auto">
         <Button
-          className="flex px-6 py-7 gap-3 text-slate-300 w-full justify-start"
+          variant="ghost"
+          className="flex px-6 py-7 gap-3 text-slate-300 w-full justify-start hover:text-slate-400 hover:bg-transparent dark:hover:bg-transparent dark:hover:text-white"
           onClick={() => {
             if (cb) cb("settings");
           }}

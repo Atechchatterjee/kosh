@@ -241,12 +241,14 @@ export default function FileView() {
               <div
                 className={cn(
                   "flex gap-4 border text-md dark:bg-primary",
-                  focusedFile === i ? "border-blue-200" : "border-border",
+                  focusedFile === i
+                    ? "border-blue-200"
+                    : "border-slate-200 dark:border-border",
                   "px-4 py-3 min-h-[2rem] rounded-md items-center dark:text-slate-300",
                   focusedFile === i
                     ? "bg-slate-100 dark:bg-secondary dark:border-slate-500"
                     : "bg-primary",
-                  " dark:hover:bg-secondary",
+                  " hover:bg-slate-100  dark:hover:bg-secondary",
                 )}
                 onClick={() => setFocusedFile(i)}
                 onDoubleClick={() => handleFileClickNavigation(file)}

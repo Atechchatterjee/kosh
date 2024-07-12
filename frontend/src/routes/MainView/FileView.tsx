@@ -31,7 +31,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { MainViewContext, RootContext } from "@/context";
+import { MainViewContext, RootContext, ThemeContext } from "@/context";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -39,6 +39,7 @@ import {
   ContextMenuItem,
 } from "@/components/ui/context-menu";
 import { NewFileDialogContext } from "@/components/NewFileDialog";
+import TitlebarNavigation from "@/components/TitlebarNavigation";
 
 function ViewContextWrapper({ children }: React.PropsWithChildren) {
   const { setOpen } = useContext(NewFileDialogContext);
@@ -230,32 +231,7 @@ export default function FileView() {
             }}
             className="items-center overflow-scroll select-none my-auto"
           />
-          <div className="flex gap-1 ml-auto dark:text-white">
-            <Button
-              variant="ghost"
-              className="w-[2.2rem] h-[2.2rem] p-2 rounded-full ml-auto"
-              onClick={WindowMinimise}
-            >
-              <RiSubtractLine size={17} />
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-[2.2rem] h-[2.2rem] p-2 rounded-full ml-auto"
-              onClick={async () => {
-                if (await WindowIsMaximised()) WindowUnmaximise();
-                else WindowMaximise();
-              }}
-            >
-              <RiExpandDiagonalLine size={17} />
-            </Button>
-            <Button
-              variant="ghost"
-              className="w-[2.2rem] h-[2.2rem] p-2 rounded-full ml-auto"
-              onClick={Quit}
-            >
-              <RiCloseFill size={17} />
-            </Button>
-          </div>
+          <TitlebarNavigation className="ml-auto" />
         </div>
       </div>
       <ViewContextWrapper>

@@ -14,7 +14,7 @@ import {
   RiImageFill,
   RiImageLine,
   RiMenuFill,
-  RiSettingsLine,
+  RiSettings2Line,
   RiStarFill,
   RiStarLine,
   RiToolsFill,
@@ -172,12 +172,12 @@ export default function MainSidebar({
       </section>
       <section className="mt-auto">
         <Button
-          className="flex px-5 py-7 gap-4 text-slate-300"
+          className="flex px-6 py-7 gap-3 text-slate-300 w-full justify-start"
           onClick={() => {
             if (cb) cb("settings");
           }}
         >
-          <RiSettingsLine />
+          <RiSettings2Line />
           Settings
         </Button>
       </section>

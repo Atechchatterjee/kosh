@@ -7,12 +7,13 @@ import {
 } from "@remixicon/react";
 import { useContext, useMemo, useState } from "react";
 import {
+  GetDefaultApplication,
   OpenFileInSublimeText,
   OpenFileInVSCode,
   OpenImageInFeh,
   OpenPdfInXDG,
   RemoveFile,
-} from "@/../wailsjs/go/main/App";
+} from "@/../wailsjs/go/backend/App";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -67,6 +68,19 @@ function FileContextWrapper({
         {!file.IsDir && (
           <>
             <ContextMenuItem
+              onClick={async () => {
+                try {
+                  await GetDefaultApplication(
+                    `${removeTrailingSlash(filePath)}/${file.FileName}`,
+                  );
+                } catch (err) {
+                  console.error(err);
+                }
+              }}
+            >
+              Open
+            </ContextMenuItem>
+            <ContextMenuItem
               onClick={() => {
                 OpenFileInVSCode(
                   `${removeTrailingSlash(filePath)}/${file.FileName}`,
@@ -86,6 +100,13 @@ function FileContextWrapper({
             </ContextMenuItem>
           </>
         )}
+        <ContextMenuItem
+          onClick={async () => {
+            navigator.clipboard.writeText(`${filePath}/${file.FileName}`);
+          }}
+        >
+          Copy Path
+        </ContextMenuItem>
         <ContextMenuItem>Properties</ContextMenuItem>
         <ContextMenuItem
           onClick={async () => {

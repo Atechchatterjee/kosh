@@ -5,7 +5,7 @@ import NewFileDialog, {
 } from "@/components/NewFileDialog";
 import { MainViewContext, RootContext } from "@/context";
 import { useState, useRef, useEffect } from "react";
-import { GetUserHomeDir, ListDir } from "../../../wailsjs/go/main/App";
+import { GetUserHomeDir, ListDir } from "../../../wailsjs/go/backend/App";
 import Settings from "../SettingsView";
 
 export default function MainView() {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"embed"
+	"kosh/backend"
+	"kosh/backend/types"
 	"log"
 
 	"github.com/wailsapp/wails/v2"
@@ -20,7 +22,7 @@ var icon []byte
 
 func main() {
 	// Create an instance of the app structure
-	app := NewApp()
+	app := backend.NewApp()
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -45,15 +47,16 @@ func main() {
 		Menu:             nil,
 		Logger:           nil,
 		LogLevel:         logger.DEBUG,
-		OnStartup:        app.startup,
-		OnDomReady:       app.domReady,
-		OnBeforeClose:    app.beforeClose,
-		OnShutdown:       app.shutdown,
+		OnStartup:        app.Startup,
+		OnDomReady:       app.DomReady,
+		OnBeforeClose:    app.BeforeClose,
+		OnShutdown:       app.Shutdown,
 		WindowStartState: options.Normal,
 		Bind: []interface{}{
 			app,
-			&FileStruct{},
-			&AdditionalParams{},
+			&backend.App{},
+			&types.FileStruct{},
+			&types.AdditionalParams{},
 		},
 		// Windows platform specific options
 		Windows: &windows.Options{

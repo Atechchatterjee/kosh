@@ -3,7 +3,7 @@ import { removeTrailingSlash } from "@/lib/utils";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { createContext, useContext } from "react";
 import { useState } from "react";
-import { CreateDir } from "../../wailsjs/go/main/App";
+import { CreateDir } from "../../wailsjs/go/backend/App";
 import { Button } from "./ui/button";
 import {
   Dialog,

@@ -1,0 +1,179 @@
+package backend
+
+import (
+	"context"
+	"fmt"
+
+	"kosh/backend/file"
+	"kosh/backend/types"
+	"os"
+	"os/exec"
+
+	"strings"
+)
+
+type App struct {
+	ctx context.Context
+}
+
+func NewApp() *App {
+	return &App{}
+}
+
+func (a *App) Startup(ctx context.Context) {
+	a.ctx = ctx
+}
+
+func (a App) DomReady(ctx context.Context) {}
+
+func (a *App) BeforeClose(ctx context.Context) (prevent bool) {
+	return false
+}
+
+func (a *App) Shutdown(ctx context.Context) {}
+
+func (a *App) GetDefaultApplication(filePath string) error {
+	fileType, err := file.GetFileType(filePath)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	defaultApplication, err := file.GetAssociatedProgram(fileType)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(defaultApplication)
+	prefixIndx := strings.Index(defaultApplication, "org.gnome")
+	fmt.Printf("prefixIndx = %d\n", prefixIndx)
+
+	if prefixIndx < 0 {
+		prefixIndx = 0
+	}
+
+	defaultApplication = defaultApplication[prefixIndx:strings.Index(defaultApplication, ".desktop")]
+
+	stdout, err := exec.Command("/bin/bash", "-c", fmt.Sprintf("%s '%s'", defaultApplication, filePath)).Output()
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	fmt.Println(stdout)
+	return nil
+}
+
+func (a *App) OpenFileInVSCode(filePath string) {
+	fmt.Printf("opening %s in vs code text ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("code '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) OpenFileInSublimeText(filePath string) {
+	fmt.Printf("opening %s in sublime text ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("subl '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) OpenPdfInXDG(filePath string) {
+	fmt.Printf("opening %s in xdg pdf viewer ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("xdg-open '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) OpenImageInFeh(filePath string) {
+	fmt.Printf("opening %s in feh image viewer ...\n", filePath)
+	cmd := exec.Command("/bin/bash", "-c", fmt.Sprintf("feh '%s'", filePath))
+	stdout, err := cmd.Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println(stdout)
+}
+
+func (a *App) RemoveFile(dirPath string) error {
+	err := os.RemoveAll(dirPath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+func (a *App) CreateDir(dirPath string) error {
+	err := os.Mkdir(dirPath, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err
+}
+
+func (a *App) CreateFile(filePath string) error {
+	f, err := os.Create(filePath)
+	if err != nil {
+		fmt.Println(err)
+	}
+	f.Close()
+	return err
+}
+
+func (a *App) ListDir(dirPath string, additionalParmas types.AdditionalParams) ([]types.FileStruct, error) {
+	files, err := file.ReadDirWithPermissionCheck(dirPath)
+
+	if len(files) == 0 {
+		return []types.FileStruct{}, nil
+	}
+
+	if err != nil {
+		fmt.Println("no permissions :(")
+		fmt.Println(err)
+		return []types.FileStruct{}, err
+	}
+
+	var fileStruct []types.FileStruct
+
+	for _, file := range files {
+		fileInfoStuct := types.FileStruct{
+			FileName: file.Name(),
+			IsDir:    file.IsDir(),
+		}
+		fileStruct = append(fileStruct, fileInfoStuct)
+	}
+
+	if additionalParmas.Sort {
+		fileStruct = file.SortFileStructByDir(fileStruct)
+	}
+
+	if !additionalParmas.IncludeDotfiles {
+		fileStruct = file.RemoveDotfiles(fileStruct)
+	}
+
+	return fileStruct, err
+}
+
+func (a *App) GetUserHomeDir() (string, error) {
+	dirname, err := os.UserHomeDir()
+	if err != nil {
+		fmt.Println("Failed to get the home dir")
+		fmt.Print(err)
+	}
+	return dirname, err
+}

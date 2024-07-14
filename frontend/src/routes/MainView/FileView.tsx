@@ -5,13 +5,11 @@ import {
   RiFile2Fill,
   RiArrowRightSLine,
 } from "@remixicon/react";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import {
-  GetDefaultApplication,
+  OpenWithDefaultApplication,
   OpenFileInSublimeText,
   OpenFileInVSCode,
-  OpenImageInFeh,
-  OpenPdfInXDG,
   RemoveFile,
 } from "@/../wailsjs/go/backend/App";
 import {
@@ -70,7 +68,7 @@ function FileContextWrapper({
             <ContextMenuItem
               onClick={async () => {
                 try {
-                  await GetDefaultApplication(
+                  await OpenWithDefaultApplication(
                     `${removeTrailingSlash(filePath)}/${file.FileName}`,
                   );
                 } catch (err) {
@@ -139,10 +137,13 @@ function PathBreadcrumb({
     () => removeTrailingSlash(path).split("/"),
     [path],
   );
+  const breadcrumbListProp = useRef<any>(null);
+  const breadcrumbProp = useRef<any>(null);
 
   return (
-    <Breadcrumb {...props}>
-      <BreadcrumbList>
+    <Breadcrumb {...props} ref={breadcrumbProp}>
+      <BreadcrumbList
+        ref={breadcrumbListProp}>
         {filePathArray.map((name, i) => (
           <>
             <BreadcrumbItem
@@ -186,17 +187,10 @@ export default function FileView() {
         alert("Need Permission to access!!");
       }
     } else {
-      const fileName: string = file.FileName;
-      const fileExtension = fileName.substring(fileName.lastIndexOf("."));
-
-      if (fileExtension === ".pdf") {
-        OpenPdfInXDG(newFilePath);
-      } else if (
-        [".png", ".jpg", ".jpeg", ".webp", ".svg"].indexOf(fileExtension) >= 0
-      ) {
-        OpenImageInFeh(newFilePath);
-      } else {
-        OpenFileInSublimeText(newFilePath);
+      try {
+        await OpenWithDefaultApplication(newFilePath);
+      } catch (err) {
+        console.error(err);
       }
     }
   }

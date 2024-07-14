@@ -9,8 +9,6 @@ export function CreateFile(arg1:string):Promise<void>;
 
 export function DomReady(arg1:context.Context):Promise<void>;
 
-export function GetDefaultApplication(arg1:string):Promise<void>;
-
 export function GetUserHomeDir():Promise<string>;
 
 export function ListDir(arg1:string,arg2:types.AdditionalParams):Promise<Array<types.FileStruct>>;
@@ -22,6 +20,8 @@ export function OpenFileInVSCode(arg1:string):Promise<void>;
 export function OpenImageInFeh(arg1:string):Promise<void>;
 
 export function OpenPdfInXDG(arg1:string):Promise<void>;
+
+export function OpenWithDefaultApplication(arg1:string):Promise<void>;
 
 export function RemoveFile(arg1:string):Promise<void>;
 

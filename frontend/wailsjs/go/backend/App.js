@@ -14,10 +14,6 @@ export function DomReady(arg1) {
   return window['go']['backend']['App']['DomReady'](arg1);
 }
 
-export function GetDefaultApplication(arg1) {
-  return window['go']['backend']['App']['GetDefaultApplication'](arg1);
-}
-
 export function GetUserHomeDir() {
   return window['go']['backend']['App']['GetUserHomeDir']();
 }
@@ -40,6 +36,10 @@ export function OpenImageInFeh(arg1) {
 
 export function OpenPdfInXDG(arg1) {
   return window['go']['backend']['App']['OpenPdfInXDG'](arg1);
+}
+
+export function OpenWithDefaultApplication(arg1) {
+  return window['go']['backend']['App']['OpenWithDefaultApplication'](arg1);
 }
 
 export function RemoveFile(arg1) {

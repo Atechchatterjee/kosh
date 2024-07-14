@@ -77,3 +77,39 @@ func GetAssociatedProgram(filePath string) (string, error) {
 
 	return strings.TrimSpace(string(out)), nil
 }
+
+func OpenFile(application string, filePath string) error {
+	_, err := exec.Command("/bin/bash", "-c", fmt.Sprintf("gtk-launch %s '%s'", application, filePath)).Output()
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+}
+
+func GetRegisteredApplications(fileType string) ([]string, error) {
+	out, err := exec.Command("gio", "mime", fileType).Output()
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// parsing each line to extract the registered application for given mime type
+	lines := strings.Split(string(out), "\n")
+	var registeredApplications []string
+
+	for i, line := range lines {
+		if i > 1 {
+			trimmedLine := strings.TrimSpace(line)
+			if trimmedLine == "No recommended applications" ||
+				trimmedLine == "Recommeneded applications:" {
+				break
+			}
+			registeredApplications = append(registeredApplications, trimmedLine)
+		}
+	}
+
+	return registeredApplications, err
+}

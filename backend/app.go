@@ -8,8 +8,6 @@ import (
 	"kosh/backend/types"
 	"os"
 	"os/exec"
-
-	"strings"
 )
 
 type App struct {
@@ -32,37 +30,44 @@ func (a *App) BeforeClose(ctx context.Context) (prevent bool) {
 
 func (a *App) Shutdown(ctx context.Context) {}
 
-func (a *App) GetDefaultApplication(filePath string) error {
+func (a *App) OpenWithDefaultApplication(filePath string) error {
+	fmt.Printf("Opening %s with default\n", filePath)
 	fileType, err := file.GetFileType(filePath)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
+	fmt.Printf("file type = %s\n", fileType)
 
 	defaultApplication, err := file.GetAssociatedProgram(fileType)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	fmt.Println(defaultApplication)
-	prefixIndx := strings.Index(defaultApplication, "org.gnome")
-	fmt.Printf("prefixIndx = %d\n", prefixIndx)
-
-	if prefixIndx < 0 {
-		prefixIndx = 0
-	}
-
-	defaultApplication = defaultApplication[prefixIndx:strings.Index(defaultApplication, ".desktop")]
-
-	stdout, err := exec.Command("/bin/bash", "-c", fmt.Sprintf("%s '%s'", defaultApplication, filePath)).Output()
 
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
-	fmt.Println(stdout)
+	if defaultApplication == "" {
+		// if no default application found it picks from the registered applications
+		registeredApplications, err := file.GetRegisteredApplications(fileType)
+
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(registeredApplications)
+		err = file.OpenFile(registeredApplications[0], filePath)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		err := file.OpenFile(defaultApplication, filePath)
+
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

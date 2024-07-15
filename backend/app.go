@@ -141,26 +141,11 @@ func (a *App) CreateFile(filePath string) error {
 }
 
 func (a *App) ListDir(dirPath string, additionalParmas types.AdditionalParams) ([]types.FileStruct, error) {
-	files, err := file.ReadDirWithPermissionCheck(dirPath)
-
-	if len(files) == 0 {
-		return []types.FileStruct{}, nil
-	}
+	fileStruct, err := file.GetDirList(dirPath)
 
 	if err != nil {
-		fmt.Println("no permissions :(")
 		fmt.Println(err)
-		return []types.FileStruct{}, err
-	}
-
-	var fileStruct []types.FileStruct
-
-	for _, file := range files {
-		fileInfoStuct := types.FileStruct{
-			FileName: file.Name(),
-			IsDir:    file.IsDir(),
-		}
-		fileStruct = append(fileStruct, fileInfoStuct)
+		return fileStruct, err
 	}
 
 	if additionalParmas.Sort {

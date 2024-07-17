@@ -14,6 +14,10 @@ export function DomReady(arg1) {
   return window['go']['backend']['App']['DomReady'](arg1);
 }
 
+export function FuzzyFindFiles(arg1, arg2) {
+  return window['go']['backend']['App']['FuzzyFindFiles'](arg1, arg2);
+}
+
 export function GetUserHomeDir() {
   return window['go']['backend']['App']['GetUserHomeDir']();
 }

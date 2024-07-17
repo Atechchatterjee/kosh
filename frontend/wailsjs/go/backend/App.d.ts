@@ -9,6 +9,8 @@ export function CreateFile(arg1:string):Promise<void>;
 
 export function DomReady(arg1:context.Context):Promise<void>;
 
+export function FuzzyFindFiles(arg1:string,arg2:string):Promise<Array<types.FileStruct>>;
+
 export function GetUserHomeDir():Promise<string>;
 
 export function ListDir(arg1:string,arg2:types.AdditionalParams):Promise<Array<types.FileStruct>>;

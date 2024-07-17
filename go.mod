@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.22.4
 
 require (
-	github.com/lithammer/fuzzysearch v1.1.8
+	github.com/lithammer/fuzzysearch v1.1.5
 	github.com/wailsapp/wails/v2 v2.9.1
 )
 

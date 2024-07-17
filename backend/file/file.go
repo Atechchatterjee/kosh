@@ -8,8 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-
-	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
 // sorts the file structs keeping the order - directories followed by regular files or visa-versa
@@ -62,7 +60,11 @@ func ReadDirWithPermissionCheck(path string) ([]fs.DirEntry, error) {
 	return files, nil
 }
 
-func GetDirList(dirPath string) ([]types.FileStruct, error) {
+type GetDirListOptionalParam struct {
+	IncludeDotFiles bool
+}
+
+func GetDirList(dirPath string, optionList GetDirListOptionalParam) ([]types.FileStruct, error) {
 	files, err := ReadDirWithPermissionCheck(dirPath)
 
 	var fileStruct []types.FileStruct
@@ -72,11 +74,22 @@ func GetDirList(dirPath string) ([]types.FileStruct, error) {
 	}
 
 	for _, file := range files {
-		fileInfoStuct := types.FileStruct{
-			FileName: file.Name(),
-			IsDir:    file.IsDir(),
+		var fileInfoStruct types.FileStruct
+		if !optionList.IncludeDotFiles {
+			if file.Name()[0] != '.' {
+				fileInfoStruct = types.FileStruct{
+					FileName: file.Name(),
+					IsDir:    file.IsDir(),
+				}
+				fileStruct = append(fileStruct, fileInfoStruct)
+			}
+		} else {
+			fileInfoStruct = types.FileStruct{
+				FileName: file.Name(),
+				IsDir:    file.IsDir(),
+			}
+			fileStruct = append(fileStruct, fileInfoStruct)
 		}
-		fileStruct = append(fileStruct, fileInfoStuct)
 	}
 
 	return fileStruct, nil
@@ -134,31 +147,4 @@ func GetRegisteredApplications(fileType string) ([]string, error) {
 	}
 
 	return registeredApplications, err
-}
-
-type Track struct {
-	Name      string
-	AlbumName string
-	Artist    string
-}
-
-var tracks = []Track{
-	{"foo", "album1", "artist1"},
-	{"bar", "album1", "artist1"},
-	{"foo", "album2", "artist1"},
-	{"baz", "album2", "artist2"},
-	{"baz", "album3", "artist2"},
-}
-
-func FuzzyFindFiles(targetString string, findList []types.FileStruct) []string {
-	var fileNames []string
-
-	for _, file := range findList {
-		fileNames = append(fileNames, file.FileName)
-	}
-
-	matchedString := fuzzy.Find(targetString, fileNames)
-	fmt.Println(matchedString)
-
-	return matchedString
 }

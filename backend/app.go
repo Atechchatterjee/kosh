@@ -3,11 +3,14 @@ package backend
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"kosh/backend/file"
 	"kosh/backend/types"
 	"os"
 	"os/exec"
+
+	"github.com/lithammer/fuzzysearch/fuzzy"
 )
 
 type App struct {
@@ -141,7 +144,9 @@ func (a *App) CreateFile(filePath string) error {
 }
 
 func (a *App) ListDir(dirPath string, additionalParmas types.AdditionalParams) ([]types.FileStruct, error) {
-	fileStruct, err := file.GetDirList(dirPath)
+	fileStruct, err := file.GetDirList(dirPath, file.GetDirListOptionalParam{
+		IncludeDotFiles: additionalParmas.IncludeDotfiles,
+	})
 
 	if err != nil {
 		fmt.Println(err)
@@ -150,10 +155,6 @@ func (a *App) ListDir(dirPath string, additionalParmas types.AdditionalParams) (
 
 	if additionalParmas.Sort {
 		fileStruct = file.SortFileStructByDir(fileStruct)
-	}
-
-	if !additionalParmas.IncludeDotfiles {
-		fileStruct = file.RemoveDotfiles(fileStruct)
 	}
 
 	return fileStruct, err
@@ -166,4 +167,33 @@ func (a *App) GetUserHomeDir() (string, error) {
 		fmt.Print(err)
 	}
 	return dirname, err
+}
+
+func (a *App) FuzzyFindFiles(targetString string, dirPath string) ([]types.FileStruct, error) {
+	m := map[string]types.FileStruct{}
+	targetString = strings.ToLower(targetString)
+	findList, err := file.GetDirList(dirPath, file.GetDirListOptionalParam{
+		IncludeDotFiles: false,
+	})
+
+	if err != nil {
+		return []types.FileStruct{}, err
+	}
+
+	var fileNames []string
+
+	for _, f := range findList {
+		fileNames = append(fileNames, strings.ToLower(f.FileName))
+		m[strings.ToLower(f.FileName)] = f
+	}
+
+	matchedStrings := fuzzy.Find(targetString, fileNames)
+	fmt.Println(matchedStrings)
+	var matchedFileStructs []types.FileStruct
+
+	for _, matchedString := range matchedStrings {
+		matchedFileStructs = append(matchedFileStructs, m[matchedString])
+	}
+
+	return matchedFileStructs, nil
 }

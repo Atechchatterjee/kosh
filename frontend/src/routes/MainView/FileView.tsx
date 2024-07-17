@@ -4,13 +4,12 @@ import {
   RiFolder3Fill,
   RiFile2Fill,
   RiArrowRightSLine,
+  RiSearchLine,
 } from "@remixicon/react";
-import { useContext, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
+  FuzzyFindFiles,
   OpenWithDefaultApplication,
-  OpenFileInSublimeText,
-  OpenFileInVSCode,
-  RemoveFile,
 } from "@/../wailsjs/go/backend/App";
 import {
   Breadcrumb,
@@ -20,7 +19,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { MainViewContext, RootContext } from "@/context";
+import { MainViewContext } from "@/context";
 import {
   ContextMenu,
   ContextMenuTrigger,
@@ -29,6 +28,12 @@ import {
 } from "@/components/ui/context-menu";
 import { NewFileDialogContext } from "@/components/NewFileDialog";
 import TitlebarNavigation from "@/components/TitlebarNavigation";
+import { Input } from "@/components/ui/input";
+import {
+  useKeyPress,
+  useComboKeyPress,
+  useMultiKeyPress,
+} from "@/hooks/useKey";
 
 function ViewContextWrapper({ children }: React.PropsWithChildren) {
   const { setOpen } = useContext(NewFileDialogContext);
@@ -48,83 +53,6 @@ function ViewContextWrapper({ children }: React.PropsWithChildren) {
   );
 }
 
-function FileContextWrapper({
-  file,
-  i,
-  getFileList,
-  children,
-}: {
-  file: any;
-  getFileList: (_?: string) => Promise<void>;
-  i: number;
-} & React.PropsWithChildren) {
-  const { filePath } = useContext(RootContext);
-  return (
-    <ContextMenu key={i} modal>
-      <ContextMenuTrigger>{children}</ContextMenuTrigger>
-      <ContextMenuContent>
-        {!file.IsDir && (
-          <>
-            <ContextMenuItem
-              onClick={async () => {
-                try {
-                  await OpenWithDefaultApplication(
-                    `${removeTrailingSlash(filePath)}/${file.FileName}`,
-                  );
-                } catch (err) {
-                  console.error(err);
-                }
-              }}
-            >
-              Open
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() => {
-                OpenFileInVSCode(
-                  `${removeTrailingSlash(filePath)}/${file.FileName}`,
-                );
-              }}
-            >
-              Open with VS Code
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={() => {
-                OpenFileInSublimeText(
-                  `${removeTrailingSlash(filePath)}/${file.FileName}`,
-                );
-              }}
-            >
-              Open With Sublime Text
-            </ContextMenuItem>
-          </>
-        )}
-        <ContextMenuItem
-          onClick={async () => {
-            navigator.clipboard.writeText(`${filePath}/${file.FileName}`);
-          }}
-        >
-          Copy Path
-        </ContextMenuItem>
-        <ContextMenuItem>Properties</ContextMenuItem>
-        <ContextMenuItem
-          onClick={async () => {
-            try {
-              await RemoveFile(
-                `${removeTrailingSlash(filePath)}/${file.FileName}`,
-              );
-              await getFileList();
-            } catch (err) {
-              console.error(err);
-            }
-          }}
-        >
-          Remove
-        </ContextMenuItem>
-      </ContextMenuContent>
-    </ContextMenu>
-  );
-}
-
 function PathBreadcrumb({
   path,
   onChangeFilePath,
@@ -135,20 +63,18 @@ function PathBreadcrumb({
 } & React.HTMLAttributes<HTMLElement>) {
   const filePathArray: string[] = useMemo(
     () => removeTrailingSlash(path).split("/"),
-    [path],
+    [path]
   );
   const breadcrumbListProp = useRef<any>(null);
   const breadcrumbProp = useRef<any>(null);
 
   return (
     <Breadcrumb {...props} ref={breadcrumbProp}>
-      <BreadcrumbList
-        ref={breadcrumbListProp}>
+      <BreadcrumbList ref={breadcrumbListProp}>
         {filePathArray.map((name, i) => (
-          <>
+          <span className="flex items-center" key={i}>
             <BreadcrumbItem
               className="cursor-pointer"
-              key={i}
               onClick={() => {
                 let modifiedFilePath = "";
                 for (let j = 0; j <= i; j++) {
@@ -161,19 +87,110 @@ function PathBreadcrumb({
               <BreadcrumbLink>{name}</BreadcrumbLink>
             </BreadcrumbItem>
             {name !== "" && i !== filePathArray.length - 1 && (
-              <BreadcrumbSeparator />
+              <BreadcrumbSeparator className="ml-3" />
             )}
-          </>
+          </span>
         ))}
       </BreadcrumbList>
     </Breadcrumb>
   );
 }
 
+function HandleNavigationKeyPress({
+  focusedFile,
+  setFocusedFile,
+  navigateUpCb,
+  navigateDownCb,
+}: {
+  focusedFile: any;
+  setFocusedFile: React.Dispatch<React.SetStateAction<number>>;
+  navigateDownCb: () => void;
+  navigateUpCb: () => void;
+}) {
+  const { fileList } = useContext(MainViewContext);
+
+  useKeyPress(
+    "j",
+    ({ down }) => {
+      if (down) {
+        setFocusedFile((focusedFile) =>
+          focusedFile === fileList.length - 1 ? focusedFile : focusedFile + 1
+        );
+      }
+    },
+    [fileList]
+  );
+
+  useKeyPress(
+    "k",
+    ({ down }) => {
+      if (down) {
+        setFocusedFile((focusedFile) =>
+          focusedFile === 0 ? 0 : focusedFile - 1
+        );
+      }
+    },
+    [fileList]
+  );
+
+  useMultiKeyPress(
+    "gg",
+    () => {
+      setFocusedFile(0);
+    },
+    []
+  );
+
+  useKeyPress(
+    "G",
+    ({ down }) => {
+      if (down) {
+        setFocusedFile(fileList.length - 1);
+      }
+    },
+    [fileList]
+  );
+
+  useKeyPress(
+    "l",
+    ({ down }) => {
+      if (down) navigateDownCb();
+    },
+    [fileList, focusedFile]
+  );
+
+  useKeyPress(
+    "h",
+    ({ down }) => {
+      if (down) navigateUpCb();
+    },
+    [fileList, focusedFile]
+  );
+
+  useKeyPress(
+    "Enter",
+    ({ down }) => {
+      if (down) {
+        navigateDownCb();
+      }
+    },
+    [fileList, focusedFile]
+  );
+
+  return <></>;
+}
+
 export default function FileView() {
-  const [focusedFile, setFocusedFile] = useState<number>(-1);
-  const { filePath, fileList, setFilePath, getFileList } =
+  const [focusedFile, setFocusedFile] = useState<number>(0);
+  const { filePath, fileList, setFileList, setFilePath, getFileList } =
     useContext(MainViewContext);
+  // show search term is primarily used to toggle navigation keybinds acc. to display state of search box
+  const [showSearchTerm, setShowSearchTerm] = useState<boolean>(false);
+  const searchInputRef = useRef<any>(null);
+  const formRef = useRef<any>(null);
+  const selectedRef = useRef<any>(null);
+
+  console.log("rendering file view...");
 
   async function handleFileClickNavigation(file: any) {
     let newFilePath = removeTrailingSlash(filePath);
@@ -199,19 +216,76 @@ export default function FileView() {
     setFilePath((prevFilePath) => {
       let newFilePath = prevFilePath.substring(
         0,
-        prevFilePath.lastIndexOf("/"),
+        prevFilePath.lastIndexOf("/")
       );
       if (newFilePath === "") newFilePath = "/";
       getFileList(newFilePath);
       return newFilePath;
     });
   }
+
+  useKeyPress(
+    "Escape",
+    ({ down }) => {
+      if (down) {
+        formRef.current.classList.add("hidden");
+        formRef.current.classList.remove("flex");
+        setShowSearchTerm(false);
+        searchInputRef.current.value = "";
+        setFocusedFile(0);
+      }
+    },
+    []
+  );
+
+  useComboKeyPress(
+    "Control+f",
+    () => {
+      if (searchInputRef.current !== null) {
+        formRef.current.classList.remove("hidden");
+        formRef.current.classList.add("flex");
+        searchInputRef.current.focus();
+        setShowSearchTerm(true);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (selectedRef.current) {
+      selectedRef.current.scrollIntoView({
+        block: "nearest",
+        inline: "nearest",
+      });
+    }
+  }, [focusedFile]);
+
   return (
-    <>
+    <span className="flex flex-col h-[100vh]">
       <div
-        className="px-3 py-2 w-full flex gap-2 select-none"
+        className="px-3 py-2 md:h-[10vh] lg:h-[7vh] xl:h-[5vh] flex gap-2 select-none bg-background"
         style={{ widows: 1 }} // acts as the handle bar for dragging windows
       >
+        {!showSearchTerm ? (
+          <HandleNavigationKeyPress
+            focusedFile={focusedFile}
+            setFocusedFile={setFocusedFile}
+            navigateDownCb={async () => {
+              if (fileList[focusedFile]) {
+                try {
+                  await handleFileClickNavigation(fileList[focusedFile]);
+                } catch (err) {
+                  console.error(err);
+                }
+              }
+            }}
+            navigateUpCb={() => {
+              moveToPrevDir();
+            }}
+          />
+        ) : (
+          <></>
+        )}
         <div className="flex gap-1 select-none">
           <Button
             variant="ghost"
@@ -239,22 +313,49 @@ export default function FileView() {
           <TitlebarNavigation className="ml-auto" />
         </div>
       </div>
+      <form
+        ref={formRef}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          try {
+            const res = await FuzzyFindFiles(
+              searchInputRef.current.value,
+              filePath
+            );
+            if (res !== null) {
+              console.log(res);
+              setFileList(res);
+            }
+          } catch (err) {
+            console.error(err);
+          }
+        }}
+        className={cn("hidden gap-2 w-full px-3 py-2")}
+      >
+        <Input
+          ref={searchInputRef}
+          placeholder="search"
+          className="flex-1"
+          autoFocus
+        />
+        <Button type="submit">
+          <RiSearchLine size={16} />
+        </Button>
+      </form>
       <ViewContextWrapper>
-        <div className="flex flex-col h-[90vh] overflow-scroll gap-2 px-3 pt-[0.5rem] pb-16 min-h-[100vh]">
-          {fileList.map((file, i) => (
-            <FileContextWrapper i={i} file={file} getFileList={getFileList}>
+        <div className="flex flex-col md:h-[90vh] lg:h-[93vh] xl:h-[95vh] overflow-scroll gap-2 px-3 pt-[0.5rem] pb-5">
+          {fileList &&
+            fileList.map((file, i) => (
               <div
                 className={cn(
                   "flex gap-4 border text-md dark:bg-primary",
                   focusedFile === i
-                    ? "border-blue-200"
-                    : "border-slate-200 dark:border-border",
-                  "px-4 py-3 min-h-[2rem] rounded-md items-center dark:text-slate-300",
-                  focusedFile === i
-                    ? "bg-slate-100 dark:bg-secondary dark:border-slate-500"
-                    : "bg-primary",
-                  " hover:bg-slate-100  dark:hover:bg-secondary",
+                    ? "border-blue-200 bg-slate-100 dark:bg-secondary dark:border-slate-500"
+                    : "border-slate-200 dark:border-border  hover:bg-slate-100  dark:hover:bg-secondary",
+                  "px-4 py-5 min-h-[2rem] rounded-md items-center dark:text-slate-300"
                 )}
+                ref={i === focusedFile ? selectedRef : null}
+                key={i}
                 onClick={() => setFocusedFile(i)}
                 onDoubleClick={() => handleFileClickNavigation(file)}
               >
@@ -267,13 +368,12 @@ export default function FileView() {
                   {file.FileName}
                 </p>
               </div>
-            </FileContextWrapper>
-          ))}
-          {fileList.length === 0 && (
+            ))}
+          {!fileList && (
             <p className="m-auto select-none text-slate-600">Empty Directory</p>
           )}
         </div>
       </ViewContextWrapper>
-    </>
+    </span>
   );
 }

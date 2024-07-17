@@ -1,12 +1,14 @@
 import FileView from "./FileView";
-import MainSidebar from "./MainSidebar";
+// import MainSidebar from "./MainSidebar";
 import NewFileDialog, {
   NewFileDialogStateWrapper,
 } from "@/components/NewFileDialog";
 import { MainViewContext, RootContext } from "@/context";
-import { useState, useRef, useEffect } from "react";
-import { GetUserHomeDir, ListDir } from "../../../wailsjs/go/backend/App";
+import { useState, useRef, useLayoutEffect } from "react";
+import { GetUserHomeDir } from "../../../wailsjs/go/backend/App";
 import Settings from "../SettingsView";
+import { fetchFileList } from "./utils";
+import MainSidebar from "./MainSidebar";
 
 export default function MainView() {
   const [fileList, setFileList] = useState<any[]>([]);
@@ -17,7 +19,9 @@ export default function MainView() {
 
   let homeDir = useRef<string>("");
 
-  useEffect(() => {
+  console.log("rendering main view...");
+
+  useLayoutEffect(() => {
     (async (): Promise<string> => {
       return new Promise(async (resolve) => {
         try {
@@ -39,15 +43,13 @@ export default function MainView() {
 
   async function getFileList(specifiedFilePath?: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      ListDir(specifiedFilePath ?? filePath, {
-        IncludeDotfiles: false,
-        Sort: true,
-      })
-        .then((res) => {
-          setFileList(res);
-          resolve();
-        })
-        .catch((err) => reject(err));
+      try {
+        const res = await fetchFileList(specifiedFilePath ?? filePath);
+        setFileList(res);
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 

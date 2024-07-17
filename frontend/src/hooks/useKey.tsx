@@ -1,4 +1,5 @@
-import { DependencyList, useEffect } from "react";
+import { useRef } from "react";
+import { DependencyList, useLayoutEffect } from "react";
 
 /**
  *
@@ -23,7 +24,7 @@ export const useKeyPress = (
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener("keydown", downHandler);
     window.addEventListener("keyup", upHandler);
 
@@ -48,15 +49,15 @@ export const useComboKeyPress = (
   const [mod, key] = targetKeys.split("+").map((key) => key.trim());
   let modPressed = false;
 
-  useKeyPress(key, ({ down }) => {
-    if (modPressed && down) {
+  const downHandler = (event: KeyboardEvent) => {
+    if (modPressed && event.key === key) {
+      modPressed = false;
       onKeyPress();
     }
-  });
-
-  const downHandler = (event: KeyboardEvent) => {
     if (event.key === mod) {
       modPressed = true;
+    } else {
+      modPressed = false;
     }
   };
 
@@ -66,13 +67,45 @@ export const useComboKeyPress = (
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     window.addEventListener("keydown", downHandler);
     window.addEventListener("keyup", upHandler);
 
     return () => {
       window.removeEventListener("keydown", downHandler);
       window.removeEventListener("keyup", upHandler);
+      modPressed = false;
+    };
+  }, dependencyList ?? []);
+};
+
+export const useMultiKeyPress = (
+  targetKeys: string,
+  onKeyPress: () => void,
+  dependencyList?: DependencyList
+) => {
+  const [key1, key2] = targetKeys.split("").map((key) => key.trim());
+  let key1Pressed = useRef<boolean>(false);
+
+  const downHandler = (event: KeyboardEvent) => {
+    if (event.key === key2 && key1Pressed.current) {
+      console.log({ key1Pressed: key1Pressed.current });
+      key1Pressed.current = false;
+      onKeyPress();
+    }
+    if (event.key === key1) {
+      key1Pressed.current = true;
+    } else {
+      key1Pressed.current = false;
+    }
+  };
+
+  useLayoutEffect(() => {
+    window.addEventListener("keydown", downHandler);
+
+    return () => {
+      window.removeEventListener("keydown", downHandler);
+      key1Pressed.current = false;
     };
   }, dependencyList ?? []);
 };

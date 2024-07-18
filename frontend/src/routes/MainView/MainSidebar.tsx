@@ -54,7 +54,7 @@ function NavItems({
           ? "bg-white dark:bg-secondary text-black dark:text-white hover:bg-white/90"
           : "bg-transparent hover:bg-[#2d333e] dark:hover:bg-secondary text-slate-300",
         "cursor-pointer rounded-sm",
-        className,
+        className
       )}
       {...props}
     >
@@ -69,7 +69,7 @@ export default function MainSidebar({
   className,
   ...props
 }: { cb?: (_: string) => void } & React.HTMLAttributes<HTMLDivElement>) {
-  const { homeDir, getFileList } = useContext(RootContext);
+  const { homeDir, updateFileList } = useContext(RootContext);
   const NavLinks: NavLink[] = [
     {
       text: "Starred",
@@ -116,7 +116,7 @@ export default function MainSidebar({
     <div
       className={cn(
         "flex flex-col h-[100vh] min-w-[15rem] bg-[#181B21] dark:bg-primary select-none text-sm",
-        className,
+        className
       )}
       {...props}
     >
@@ -146,7 +146,7 @@ export default function MainSidebar({
               )}
               successCb={() => {
                 setPopOverOpen(false);
-                getFileList();
+                updateFileList();
               }}
             />
             <div className="flex gap-1 px-2 items-center cursor-pointer rounded-md hover:bg-slate-200 dark:hover:bg-secondary">

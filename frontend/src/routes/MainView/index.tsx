@@ -34,14 +34,14 @@ export default function MainView() {
     })()
       .then((homeDir) => {
         setFilePath(homeDir);
-        getFileList(homeDir);
+        updateFileList(homeDir);
       })
       .catch((err) => {
         console.error(err);
       });
   }, []);
 
-  async function getFileList(specifiedFilePath?: string): Promise<void> {
+  async function updateFileList(specifiedFilePath?: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
       try {
         const res = await fetchFileList(specifiedFilePath ?? filePath);
@@ -55,7 +55,11 @@ export default function MainView() {
 
   return (
     <RootContext.Provider
-      value={{ homeDir: homeDir.current, filePath: filePath, getFileList }}
+      value={{
+        homeDir: homeDir.current,
+        filePath: filePath,
+        updateFileList,
+      }}
     >
       <NewFileDialogStateWrapper>
         <div className="flex gap-2 bg-background">
@@ -69,26 +73,26 @@ export default function MainView() {
                     setRightSideView("fileView");
                   }
                   setFilePath(linkPath);
-                  getFileList(linkPath);
+                  updateFileList(linkPath);
                 }
               }}
               className="fixed"
             />
           </div>
-          <div className="w-full h-[100vh] overflow-hidden gap-4 bg-background">
+          <div className="w-full overflow-scroll gap-4 bg-background">
             <MainViewContext.Provider
               value={{
                 fileList,
                 setFileList,
                 filePath,
                 setFilePath,
-                getFileList,
+                updateFileList,
               }}
             >
               {rightSideView === "fileView" ? <FileView /> : <Settings />}
             </MainViewContext.Provider>
           </div>
-          <NewFileDialog className="hidden" successCb={getFileList} />
+          <NewFileDialog className="hidden" successCb={updateFileList} />
         </div>
       </NewFileDialogStateWrapper>
     </RootContext.Provider>

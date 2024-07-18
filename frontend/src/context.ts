@@ -3,11 +3,11 @@ import React from "react";
 export const RootContext = React.createContext<{
   homeDir: string;
   filePath: string;
-  getFileList: () => void;
+  updateFileList: () => void;
 }>({
   homeDir: "",
   filePath: "/",
-  getFileList: () => {},
+  updateFileList: () => {},
 });
 
 export const MainViewContext = React.createContext<{
@@ -15,13 +15,13 @@ export const MainViewContext = React.createContext<{
   setFileList: React.Dispatch<React.SetStateAction<any[]>>;
   filePath: string;
   setFilePath: React.Dispatch<React.SetStateAction<string>>;
-  getFileList: (_?: string) => Promise<void>;
+  updateFileList: (_?: string) => Promise<void>;
 }>({
   fileList: [],
   setFileList: () => {},
   filePath: "",
   setFilePath: () => {},
-  getFileList: () => new Promise(() => {}),
+  updateFileList: () => new Promise(() => {}),
 });
 
 export const ThemeContext = React.createContext<{

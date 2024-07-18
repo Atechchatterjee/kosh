@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { DependencyList, useLayoutEffect } from "react";
+import { DependencyList, useEffect } from "react";
 
 /**
  *
@@ -9,28 +8,20 @@ import { DependencyList, useLayoutEffect } from "react";
  */
 export const useKeyPress = (
   targetKey: string,
-  onKeyPress: ({ up, down }: { up: boolean; down: boolean }) => void,
+  onKeyPress: () => void,
   dependencyList?: DependencyList
 ) => {
   const downHandler = ({ key }: KeyboardEvent) => {
     if (key === targetKey) {
-      onKeyPress({ up: false, down: true });
+      onKeyPress();
     }
   };
 
-  const upHandler = ({ key }: KeyboardEvent) => {
-    if (key === targetKey) {
-      onKeyPress({ up: true, down: false });
-    }
-  };
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", downHandler);
-    window.addEventListener("keyup", upHandler);
 
     return () => {
       window.removeEventListener("keydown", downHandler);
-      window.removeEventListener("keyup", upHandler);
     };
   }, dependencyList ?? []);
 };
@@ -54,11 +45,7 @@ export const useComboKeyPress = (
       modPressed = false;
       onKeyPress();
     }
-    if (event.key === mod) {
-      modPressed = true;
-    } else {
-      modPressed = false;
-    }
+    modPressed = event.key === mod;
   };
 
   const upHandler = ({ key }: KeyboardEvent) => {
@@ -67,14 +54,13 @@ export const useComboKeyPress = (
     }
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", downHandler);
     window.addEventListener("keyup", upHandler);
 
     return () => {
       window.removeEventListener("keydown", downHandler);
       window.removeEventListener("keyup", upHandler);
-      modPressed = false;
     };
   }, dependencyList ?? []);
 };
@@ -85,27 +71,21 @@ export const useMultiKeyPress = (
   dependencyList?: DependencyList
 ) => {
   const [key1, key2] = targetKeys.split("").map((key) => key.trim());
-  let key1Pressed = useRef<boolean>(false);
+  let key1Pressed = false;
 
   const downHandler = (event: KeyboardEvent) => {
-    if (event.key === key2 && key1Pressed.current) {
-      console.log({ key1Pressed: key1Pressed.current });
-      key1Pressed.current = false;
+    if (event.key === key2 && key1Pressed) {
+      key1Pressed = false;
       onKeyPress();
     }
-    if (event.key === key1) {
-      key1Pressed.current = true;
-    } else {
-      key1Pressed.current = false;
-    }
+    key1Pressed = event.key === key1;
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", downHandler);
 
     return () => {
       window.removeEventListener("keydown", downHandler);
-      key1Pressed.current = false;
     };
   }, dependencyList ?? []);
 };
